@@ -1,11 +1,16 @@
-import express, { Request, Response } from 'express';
+import express from 'express';
 
+//importar variáveis de ambiente do arquivo .env
+import dotenv from 'dotenv';
+dotenv.config();
+
+//criar uma instância do express
 const app = express();
 
-app.get("/", (req:Request, res:Response) =>{
-  res.send("Bem vindo pessoal!");
-});
+import login from './controllers/login';
 
-app.listen(8080, () => {
-  console.log("Server is running on port 8080: http://localhost:8080");
+app.use("/", login);
+
+app.listen(process.env.PORT, () => {
+  console.log(`Server is running on port ${process.env.PORT}: http://localhost:${process.env.PORT}`);
 });
