@@ -1,6 +1,7 @@
 import "reflect-metadata"
 import { DataSource } from "typeorm";
 
+// Configuração do DataSource para o TypeORM
 const dialect = process.env.DB_DIALECT ?? "mysql";
 export const AppDataSource = new DataSource({
     type: dialect as "mysql" | "postgres"| "mariadb" | "mongodb",

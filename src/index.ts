@@ -12,5 +12,5 @@ import login from './controllers/login';
 app.use("/", login);
 
 app.listen(process.env.PORT, () => {
-  console.log(`Server is running on port ${process.env.PORT}: http://localhost:${process.env.PORT}`);
+  console.log(`O servidor está em execução na porta ${process.env.PORT}: http://localhost:${process.env.PORT}`);
 });

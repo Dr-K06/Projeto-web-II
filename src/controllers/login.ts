@@ -13,7 +13,8 @@ AppDataSource.initialize().then(() => {
 
 //Criar uma rota de login
 Router.get("/", (req:Request, res:Response) =>{
-  res.send("Bem vindo pessoal! tela de login da rota");
+  res.send("Bem vindo pessoal! tela de login da nova rota");
 })
 
+//Exportar o Router para ser usado em outros arquivos
 export default Router
