@@ -1,0 +1,19 @@
+import { Entity, PrimaryGeneratedColumn, Column } from "typeorm"
+
+@Entity('situations')
+export class Situation {
+    @PrimaryGeneratedColumn()
+    id!: number;
+
+    @Column()
+    namesSituation!: string;
+
+    @Column(type: "timestamp", default: () => "CURRENT_TIMESTAMP")
+    createdAt!: Date;
+
+    @Column(type: "timestamp", default: () => "CURRENT_TIMESTAMP", onUpdate: "CURRENT_TIMESTAMP")
+    updatedAt!: Date;
+
+    @OneToMany(() => User, (user) => user.situation)
+    users!: User[]
+}
