@@ -7,7 +7,7 @@
 
     // Environment Settings
     // See also https://aka.ms/tsconfig/module
-    "module": "commonjs",
+"module": "Node16",
     "outDir": "dist", //diretorio de saída dos arquivos compilados
     "rootDir": "src", //diretorio raiz dos arquivos de entrada
     "target": "esnext", //versão do javascript que será gerada
@@ -46,7 +46,7 @@
     "forceConsistentCasingInFileNames": true,
         "esModuleInterop": true,
     "resolveJsonModule": true,
-    "moduleResolution": "node",
+    "moduleResolution": "node16",
     "ignoreDeprecations": "6.0"
   
   }
