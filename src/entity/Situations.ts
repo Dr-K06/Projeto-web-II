@@ -13,7 +13,7 @@ export class Situation {
     @PrimaryGeneratedColumn()
     id!: number;
 
-    @Column()
+    @Column({unique: true })
     namesSituation!: string;
 
     @Column({
