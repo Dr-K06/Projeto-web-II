@@ -1,19 +1,32 @@
 import express from 'express';
-
-//importar variáveis de ambiente do arquivo .env
 import dotenv from 'dotenv';
+import { AppDataSource } from './data-source';
+
+import AuthController from './controllers/AuthController';
+import SituationsController from './controllers/SituationsController';
+
 dotenv.config();
 
-//criar uma instância do express
 const app = express();
 
-//importar o arquivo de rotas
-import login from './controllers/login';
+app.use(express.json());
 
-//usar o arquivo de rotas
-app.use("/", login);
+app.use('/', AuthController);
+app.use('/', SituationsController);
 
-//iniciar o servidor
-app.listen(process.env.PORT, () => {
-  console.log(`O servidor está em execução na porta ${process.env.PORT}: http://localhost:${process.env.PORT}`);
-});
+const PORT = Number(process.env.PORT) || 8080;
+
+AppDataSource.initialize()
+  .then(() => {
+    console.log('Conexão com o banco de dados estabelecida com sucesso!');
+
+    app.listen(PORT, () => {
+      console.log(
+        `O servidor está em execução na porta ${PORT}: http://localhost:${PORT}`
+      );
+    });
+  })
+  .catch((error) => {
+    console.error('Erro ao conectar ao banco de dados:', error);
+    process.exit(1);
+  });

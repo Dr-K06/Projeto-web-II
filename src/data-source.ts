@@ -1,5 +1,8 @@
 import "reflect-metadata"
 import { DataSource } from "typeorm";
+import { User } from "./entity/Users";
+import { Situation } from "./entity/Situations";
+
 
 //importar variáveis de ambiente do arquivo .env
 import dotenv from 'dotenv';
@@ -14,9 +17,9 @@ export const AppDataSource = new DataSource({
     username: process.env.DB_USERNAME || "root",
     password: process.env.DB_PASSWORD || "mysql090306",
     database: process.env.DB_NAME || "nodeapi",
-    synchronize: true,
+    synchronize: false,
     logging: true,
-    entities: [],
+    entities: [User, Situation],
     subscribers: [],
     migrations: [__dirname + "/migration/*.js"],
 })
