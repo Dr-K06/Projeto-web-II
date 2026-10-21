@@ -22,21 +22,18 @@ router.get('/Situations', async (_req: Request, res: Response) => {
 });
 
 // CONSULTAR UMA SITUAÇÃO PELO ID
-
 router.get('/Situations/:id', async (req: Request, res: Response) => {
   try {
     const id = Number(req.params.id);
 
-    console.log('ID recebido na rota:', req.params.id);
-    console.log('ID convertido para número:', id);
+    if (!Number.isInteger(id) || id <= 0) {
+      return res.status(400).json({
+        mensagem: 'ID inválido!',
+      });
+    }
 
     const situationRepository = AppDataSource.getRepository(Situation);
-
-    const situation = await situationRepository.findOne({
-      where: { id: id },
-    });
-
-    console.log('Resultado da consulta:', situation);
+    const situation = await situationRepository.findOneBy({ id });
 
     if (!situation) {
       return res.status(404).json({
@@ -46,7 +43,7 @@ router.get('/Situations/:id', async (req: Request, res: Response) => {
 
     return res.status(200).json({
       mensagem: `Situação de ID ${id} encontrada com sucesso!`,
-      situation: situation,
+      situation,
     });
   } catch (error) {
     console.error('Erro ao consultar situação:', error);
@@ -56,7 +53,6 @@ router.get('/Situations/:id', async (req: Request, res: Response) => {
     });
   }
 });
-
 
 // CADASTRAR SITUAÇÃO SEM PERMITIR NOMES DUPLICADOS
 router.post('/Situations', async (req: Request, res: Response) => {
@@ -113,7 +109,69 @@ router.post('/Situations', async (req: Request, res: Response) => {
 
     return res.status(500).json({
       mensagem: 'Erro ao cadastrar situação!',
-      erro: error instanceof Error ? error.message : String(error),
+    });
+  }
+});
+
+// ATUALIZAR SITUAÇÃO PELO ID
+router.put('/Situations/:id', async (req: Request, res: Response) => {
+  try {
+    const id = Number(req.params.id);
+
+    if (!Number.isInteger(id) || id <= 0) {
+      return res.status(400).json({
+        mensagem: 'ID inválido!',
+      });
+    }
+
+    const { namesSituation } = req.body as {
+      namesSituation?: string;
+    };
+
+    if (
+      typeof namesSituation !== 'string' ||
+      namesSituation.trim() === ''
+    ) {
+      return res.status(400).json({
+        mensagem: 'Informe um nome válido para a situação!',
+      });
+    }
+
+    const nome = namesSituation.trim();
+    const situationRepository = AppDataSource.getRepository(Situation);
+
+    const situation = await situationRepository.findOneBy({ id });
+
+    if (!situation) {
+      return res.status(404).json({
+        mensagem: `Nenhuma situação encontrada com o ID ${id}!`,
+      });
+    }
+
+    // Impedir que outra situação já utilize esse nome
+    const duplicate = await situationRepository.findOne({
+      where: { namesSituation: nome },
+    });
+
+    if (duplicate && duplicate.id !== id) {
+      return res.status(409).json({
+        mensagem: 'Já existe outra situação com esse nome!',
+      });
+    }
+
+    situation.namesSituation = nome;
+
+    const updatedSituation = await situationRepository.save(situation);
+
+    return res.status(200).json({
+      mensagem: `Situação de ID ${id} atualizada com sucesso!`,
+      situation: updatedSituation,
+    });
+  } catch (error) {
+    console.error('Erro ao atualizar situação:', error);
+
+    return res.status(500).json({
+      mensagem: 'Erro interno ao atualizar situação!',
     });
   }
 });
