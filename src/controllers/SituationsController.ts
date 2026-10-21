@@ -176,4 +176,46 @@ router.put('/Situations/:id', async (req: Request, res: Response) => {
   }
 });
 
+
+ // DELETAR SITUAÇÃO PELO ID
+router.delete('/Situations/:id', async (req: Request, res: Response) => {
+  try {
+    const id = Number(req.params.id);
+
+    // Validar o ID
+    if (!Number.isInteger(id) || id <= 0) {
+      return res.status(400).json({
+        mensagem: 'ID inválido!',
+      });
+    }
+
+    const situationRepository = AppDataSource.getRepository(Situation);
+
+    // Buscar a situação pelo ID
+    const situation = await situationRepository.findOneBy({ id });
+
+    // Verificar se existe
+    if (!situation) {
+      return res.status(404).json({
+        mensagem: `Nenhuma situação encontrada com o ID ${id}!`,
+      });
+    }
+
+    // Excluir a situação
+    await situationRepository.remove(situation);
+
+    return res.status(200).json({
+      mensagem: `Situação de ID ${id} deletada com sucesso!`,
+      situation,
+    });
+  } catch (error) {
+    console.error('Erro ao deletar situação:', error);
+
+    return res.status(500).json({
+      mensagem: 'Erro interno ao deletar situação!',
+    });
+  }
+});
+
+
 export default router;
