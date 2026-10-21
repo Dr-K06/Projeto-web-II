@@ -1,17 +1,65 @@
-
 import express, { Request, Response } from 'express';
 import { AppDataSource } from '../data-source';
 import { Situation } from '../entity/Situations';
 
 const router = express.Router();
 
-// LISTAR TODAS AS SITUAÇÕES
-router.get('/Situations', async (_req: Request, res: Response) => {
+// LISTAR TODAS AS SITUAÇÕES COM PAGINAÇÃO
+router.get('/Situations', async (req: Request, res: Response) => {
   try {
     const situationRepository = AppDataSource.getRepository(Situation);
-    const situations = await situationRepository.find();
 
-    return res.status(200).json(situations);
+    // Receber a página solicitada (padrão: página 1)
+    const page = Number(req.query.page) || 1;
+
+    // Quantidade de registros por página
+    const limit = 1;
+
+    // Validar o número da página
+    if (!Number.isInteger(page) || page < 1) {
+      return res.status(400).json({
+        mensagem: 'O número da página deve ser um inteiro positivo!',
+      });
+    }
+
+    // Contar o total de situações
+    const totalSituations = await situationRepository.count();
+
+    // Verificar se existem situações cadastradas
+    if (totalSituations === 0) {
+      return res.status(404).json({
+        mensagem: 'Nenhuma situação encontrada!',
+      });
+    }
+
+    // Calcular a última página e o deslocamento
+    const lastPage = Math.ceil(totalSituations / limit);
+    const offset = (page - 1) * limit;
+
+    // Verificar se a página solicitada existe
+    if (page > lastPage) {
+      return res.status(404).json({
+        mensagem: `A página ${page} não existe!`,
+        lastPage,
+      });
+    }
+
+    // Buscar os registros da página solicitada
+    const situations = await situationRepository.find({
+      skip: offset,
+      take: limit,
+      order: {
+        id: 'ASC',
+      },
+    });
+
+    return res.status(200).json({
+      currentPage: page,
+      lastPage,
+      totalSituations,
+      limit,
+      situations,
+    });
   } catch (error) {
     console.error('Erro ao listar situações:', error);
 
@@ -148,7 +196,7 @@ router.put('/Situations/:id', async (req: Request, res: Response) => {
       });
     }
 
-    // Impedir que outra situação já utilize esse nome
+    // Impedir nomes duplicados em outras situações
     const duplicate = await situationRepository.findOne({
       where: { namesSituation: nome },
     });
@@ -176,13 +224,11 @@ router.put('/Situations/:id', async (req: Request, res: Response) => {
   }
 });
 
-
- // DELETAR SITUAÇÃO PELO ID
+// DELETAR SITUAÇÃO PELO ID
 router.delete('/Situations/:id', async (req: Request, res: Response) => {
   try {
     const id = Number(req.params.id);
 
-    // Validar o ID
     if (!Number.isInteger(id) || id <= 0) {
       return res.status(400).json({
         mensagem: 'ID inválido!',
@@ -190,18 +236,14 @@ router.delete('/Situations/:id', async (req: Request, res: Response) => {
     }
 
     const situationRepository = AppDataSource.getRepository(Situation);
-
-    // Buscar a situação pelo ID
     const situation = await situationRepository.findOneBy({ id });
 
-    // Verificar se existe
     if (!situation) {
       return res.status(404).json({
         mensagem: `Nenhuma situação encontrada com o ID ${id}!`,
       });
     }
 
-    // Excluir a situação
     await situationRepository.remove(situation);
 
     return res.status(200).json({
@@ -216,6 +258,5 @@ router.delete('/Situations/:id', async (req: Request, res: Response) => {
     });
   }
 });
-
 
 export default router;
