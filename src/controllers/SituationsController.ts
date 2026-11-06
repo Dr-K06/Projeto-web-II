@@ -3,6 +3,7 @@ import express, { Request, Response } from 'express';
 import { AppDataSource } from '../data-source';
 import { Situation } from '../entity/Situations';
 import { PaginationService } from '../services/PaginationService';
+import * as yup from 'yup';
 
 const router = express.Router();
 
@@ -111,6 +112,14 @@ router.post('/Situations', async (req: Request, res: Response) => {
       namesSituation?: string;
     };
 
+    const schema = yup.object().shape({
+      namesSituation: yup.string()
+        .required('O nome da situação é obrigatório!')
+        .min(1, 'O nome da situação não pode ser vazio!'),
+    });
+
+    await schema.validate(req.body, { abortEarly: false });
+
     if (
       typeof namesSituation !== 'string' ||
       namesSituation.trim() === ''
@@ -145,6 +154,13 @@ router.post('/Situations', async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error('Erro ao cadastrar situação:', error);
+
+    if (error instanceof yup.ValidationError) {
+      return res.status(400).json({
+        mensagem: 'Erro de validação!',
+        erros: error.errors,
+      });
+    }
 
     if (
       typeof error === 'object' &&
