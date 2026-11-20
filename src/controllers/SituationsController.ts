@@ -132,6 +132,7 @@ router.post('/Situations', async (req: Request, res: Response) => {
     const nome = namesSituation.trim();
     const situationRepository = AppDataSource.getRepository(Situation);
 
+    // Verificar se já existe uma situação com o mesmo nome
     const situationExists = await situationRepository.findOne({
       where: { namesSituation: nome },
     });
@@ -155,6 +156,7 @@ router.post('/Situations', async (req: Request, res: Response) => {
   } catch (error) {
     console.error('Erro ao cadastrar situação:', error);
 
+    // Tratar erros de validação do Yup
     if (error instanceof yup.ValidationError) {
       return res.status(400).json({
         mensagem: 'Erro de validação!',
@@ -162,6 +164,7 @@ router.post('/Situations', async (req: Request, res: Response) => {
       });
     }
 
+    // Tratar nomes duplicados no banco de dados
     if (
       typeof error === 'object' &&
       error !== null &&
